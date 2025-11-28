@@ -1,0 +1,13 @@
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/preflight" layer(base);
+@import "tailwindcss/utilities" layer(utilities);
+*{
+  /*Si elle n'est pas trouvée, utilise une police sans-serif*/
+  font-family:"Prompt", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50;
+  }
+}
