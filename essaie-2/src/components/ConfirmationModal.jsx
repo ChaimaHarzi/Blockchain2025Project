@@ -41,7 +41,7 @@ export default function ConfirmationModal({
   const colors = getColors();
 
   return (
-    <div className="fixed inset-0 bg-white/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0"

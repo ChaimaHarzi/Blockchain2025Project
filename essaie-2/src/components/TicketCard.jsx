@@ -1,4 +1,4 @@
-import { Calendar, MapPin, AlertTriangle, Send, History } from "lucide-react";
+import { Calendar, MapPin, AlertTriangle } from "lucide-react";
 
 export default function TicketCard({
   name,
@@ -9,11 +9,20 @@ export default function TicketCard({
   place,
   image,
   type,
-  onTransfer,
-  onViewDetails
+  buttons = [] // Array of button objects: { label, icon: Icon, onClick, variant: 'primary'|'secondary'|'danger'|'success' }
 }) {
 
   const isExpired = new Date(date) < new Date();
+
+  const getButtonStyles = (variant = 'primary') => {
+    const styles = {
+      primary: 'bg-purple-600 text-white hover:bg-purple-700',
+      secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+      danger: 'bg-red-600 text-white hover:bg-red-700',
+      success: 'bg-green-600 text-white hover:bg-green-700'
+    };
+    return styles[variant] || styles.primary;
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition overflow-hidden group">
@@ -67,34 +76,36 @@ export default function TicketCard({
         </div>
 
         {/* État */}
-        <div className="mt-2">
-          {status === "en vente" ? (
-            <span className="text-green-600 font-semibold text-sm">
-              • En vente
-            </span>
-          ) : (
-            <span className="text-gray-500 text-sm">Non vendu</span>
-          )}
-        </div>
+        {status && (
+          <div className="mt-2">
+            {status === "en vente" ? (
+              <span className="text-green-600 font-semibold text-sm">
+                • En vente
+              </span>
+            ) : (
+              <span className="text-gray-500 text-sm">Non vendu</span>
+            )}
+          </div>
+        )}
 
         {/* Boutons d'action */}
-        <div className="flex space-x-2 mt-3">
-          <button
-            onClick={onTransfer}
-            className="flex-1 bg-purple-600 text-white py-2 px-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-1 text-sm font-medium"
-          >
-            <Send className="w-4 h-4" />
-            <span>Transférer</span>
-          </button>
-          
-          <button
-            onClick={onViewDetails}
-            className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-1 text-sm font-medium"
-          >
-            <History className="w-4 h-4" />
-            <span>Détails</span>
-          </button>
-        </div>
+        {buttons.length > 0 && (
+          <div className={`flex gap-2 mt-3 ${buttons.length === 1 ? '' : ''}`}>
+            {buttons.map((btn, index) => {
+              const ButtonIcon = btn.icon;
+              return (
+                <button
+                  key={index}
+                  onClick={btn.onClick}
+                  className={`flex-1 py-2 px-3 rounded-lg transition-colors flex items-center justify-center space-x-1 text-sm font-medium ${getButtonStyles(btn.variant)}`}
+                >
+                  {ButtonIcon && <ButtonIcon className="w-4 h-4" />}
+                  <span>{btn.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

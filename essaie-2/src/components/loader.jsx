@@ -37,7 +37,7 @@ export const LoaderModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div 
-        className={`absolute inset-0 ${type === 'error' ? 'bg-black/30 backdrop-blur-md' : 'bg-black bg-opacity-60 backdrop-blur-md'}`}
+        className={`absolute inset-0 ${type === 'error' ? 'bg-black/30 backdrop-blur-md' : 'bg-black/30 backdrop-blur-md'}`}
         onClick={type !== 'loading' ? onClose : undefined}
       />
       

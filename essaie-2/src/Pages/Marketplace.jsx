@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Store, Filter, SlidersHorizontal, TrendingUp, Ticket, X, Search, Calendar, DollarSign, Tag, History, ShoppingCart, XCircle } from 'lucide-react';
+import { Store, Filter, SlidersHorizontal, TrendingUp, Ticket, X, Search, Calendar, DollarSign, Tag, History, ShoppingCart, XCircle, MapPin } from 'lucide-react';
 import TicketCard from '../components/TicketCard';
 import { LoaderModal } from '../components/loader';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function Marketplace() {
   const [activeTab, setActiveTab] = useState('marche'); // marche, mes-ventes
@@ -12,6 +13,7 @@ export default function Marketplace() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [priceInput, setPriceInput] = useState('');
   const [loader, setLoader] = useState({ isOpen: false, message: '', type: 'loading' });
+  const [confirmation, setConfirmation] = useState({ isOpen: false, title: '', message: '', action: null, actionData: null });
   
   // Filtres
   const [filters, setFilters] = useState({
@@ -141,42 +143,122 @@ export default function Marketplace() {
   };
 
   const handleBuyTicket = (ticket) => {
-    setLoader({ isOpen: true, message: 'Achat du billet en cours...', type: 'loading' });
-    
-    setTimeout(() => {
-      setLoader({ isOpen: true, message: 'Billet acheté avec succès ! 🎉', type: 'success' });
-      setTimeout(() => {
-        setLoader({ isOpen: false, message: '', type: 'loading' });
-      }, 2000);
-    }, 2000);
+    setSelectedTicket(ticket);
+    setConfirmation({
+      isOpen: true,
+      title: 'Confirmer l\'achat',
+      message: `Voulez-vous acheter "${ticket.name}" pour ${ticket.price} ETH ?`,
+      action: 'buy',
+      actionData: ticket
+    });
   };
 
   const handlePutOnSale = () => {
     if (!priceInput || parseFloat(priceInput) <= 0) {
       setLoader({ isOpen: true, message: 'Veuillez entrer un prix valide', type: 'error' });
+      setTimeout(() => {
+        setLoader({ isOpen: false, message: '', type: 'loading' });
+      }, 2000);
       return;
     }
 
     setShowPriceModal(false);
-    setLoader({ isOpen: true, message: 'Mise en vente du billet...', type: 'loading' });
-    
-    setTimeout(() => {
-      setLoader({ isOpen: true, message: 'Billet mis en vente avec succès !', type: 'success' });
-      setTimeout(() => {
-        setLoader({ isOpen: false, message: '', type: 'loading' });
-      }, 2000);
-    }, 1500);
+    setConfirmation({
+      isOpen: true,
+      title: 'Mettre en vente',
+      message: `Confirmer la mise en vente de "${selectedTicket.name}" pour ${priceInput} ETH ?`,
+      action: 'putOnSale',
+      actionData: { ticket: selectedTicket, price: priceInput }
+    });
   };
 
   const handleCancelSale = (ticket) => {
-    setLoader({ isOpen: true, message: 'Annulation de la vente...', type: 'loading' });
+    setSelectedTicket(ticket);
+    setConfirmation({
+      isOpen: true,
+      title: 'Annuler la vente',
+      message: `Êtes-vous sûr de vouloir annuler la vente de "${ticket.name}" ?`,
+      action: 'cancelSale',
+      actionData: ticket,
+      type: 'danger'
+    });
+  };
+
+  const executeAction = async () => {
+    setConfirmation({ ...confirmation, isOpen: false });
+
+    switch (confirmation.action) {
+      case 'buy':
+        await executeBuy(confirmation.actionData);
+        break;
+      case 'putOnSale':
+        await executePutOnSale(confirmation.actionData.ticket, confirmation.actionData.price);
+        break;
+      case 'cancelSale':
+        await executeCancelSale(confirmation.actionData);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const executeBuy = async (ticket) => {
+    setLoader({ isOpen: true, message: 'Traitement de votre achat...', type: 'loading' });
     
-    setTimeout(() => {
-      setLoader({ isOpen: true, message: 'Vente annulée avec succès', type: 'success' });
+    try {
+      // Simulate blockchain transaction
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setLoader({ isOpen: true, message: `Billet "${ticket.name}" acheté avec succès ! 🎉`, type: 'success' });
+      
       setTimeout(() => {
         setLoader({ isOpen: false, message: '', type: 'loading' });
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      setLoader({ isOpen: true, message: 'Erreur lors de l\'achat. Veuillez réessayer.', type: 'error' });
+      setTimeout(() => {
+        setLoader({ isOpen: false, message: '', type: 'loading' });
+      }, 2000);
+    }
+  };
+
+  const executePutOnSale = async (ticket, price) => {
+    setLoader({ isOpen: true, message: 'Mise en vente du billet...', type: 'loading' });
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setLoader({ isOpen: true, message: `"${ticket.name}" mis en vente pour ${price} ETH !`, type: 'success' });
+      setPriceInput('');
+      
+      setTimeout(() => {
+        setLoader({ isOpen: false, message: '', type: 'loading' });
+      }, 2000);
+    } catch (error) {
+      setLoader({ isOpen: true, message: 'Erreur lors de la mise en vente.', type: 'error' });
+      setTimeout(() => {
+        setLoader({ isOpen: false, message: '', type: 'loading' });
+      }, 2000);
+    }
+  };
+
+  const executeCancelSale = async (ticket) => {
+    setLoader({ isOpen: true, message: 'Annulation de la vente...', type: 'loading' });
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setLoader({ isOpen: true, message: `La vente de "${ticket.name}" a été annulée`, type: 'success' });
+      
+      setTimeout(() => {
+        setLoader({ isOpen: false, message: '', type: 'loading' });
+      }, 2000);
+    } catch (error) {
+      setLoader({ isOpen: true, message: 'Erreur lors de l\'annulation.', type: 'error' });
+      setTimeout(() => {
+        setLoader({ isOpen: false, message: '', type: 'loading' });
+      }, 2000);
+    }
   };
 
   const openHistoryModal = (ticket) => {
@@ -362,91 +444,72 @@ export default function Marketplace() {
         {/* Grille de billets */}
         {getCurrentTickets().length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getCurrentTickets().map((ticket) => (
-              <div key={ticket.id} className="relative">
-                {activeTab === 'marche' ? (
-                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition overflow-hidden group">
-                    <div className="relative h-40 w-full overflow-hidden">
-                      <img
-                        src={ticket.image}
-                        alt={ticket.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-                      />
-                      <div className="absolute bottom-2 left-2 bg-white/90 px-3 py-1 rounded-lg text-sm font-bold text-purple-600">
-                        {ticket.price} ETH
-                      </div>
-                      {new Date(ticket.date) < new Date() && (
-                        <div className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center space-x-1">
-                          <span>Non valide</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4 space-y-2">
-                      <div className="text-lg font-bold">{ticket.name}</div>
-                      <div className="text-sm text-gray-600">{ticket.eventName}</div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-500 mt-2">
-                        <span>{ticket.date}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <span>{ticket.place}</span>
-                      </div>
-                      <div className={`inline-block text-xs px-3 py-1 rounded-full font-semibold ${
-                        ticket.type === "premium" ? "bg-yellow-100 text-yellow-600" : "bg-blue-100 text-blue-600"
-                      }`}>
-                        {ticket.type.toUpperCase()}
-                      </div>
-                      <div className="flex space-x-2 mt-3">
-                        <button
-                          onClick={() => handleBuyTicket(ticket)}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-500 text-white py-2 px-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center space-x-1 text-sm font-medium"
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                          <span>Acheter</span>
-                        </button>
-                        <button
-                          onClick={() => openHistoryModal(ticket)}
-                          className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-1 text-sm font-medium"
-                        >
-                          <History className="w-4 h-4" />
-                          <span>Historique</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <TicketCard
-                    {...ticket}
-                    onTransfer={() => {}}
-                    onViewDetails={() => openHistoryModal(ticket)}
-                  />
-                )}
+            {getCurrentTickets().map((ticket) => {
+              let buttonConfig = [];
 
-                {/* Boutons pour Mes Ventes */}
-                {activeTab === 'mes-ventes' && (
-                  <div className="mt-3 space-y-2">
-                    {subTab === 'disponibles' && (
-                      <button
-                        onClick={() => openPriceModal(ticket)}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all font-semibold flex items-center justify-center space-x-2"
-                      >
-                        <TrendingUp className="w-5 h-5" />
-                        <span>Mettre en vente</span>
-                      </button>
-                    )}
+              // Determine buttons based on context
+              if (activeTab === 'marche') {
+                buttonConfig = [
+                  {
+                    label: 'Acheter',
+                    icon: ShoppingCart,
+                    onClick: () => handleBuyTicket(ticket),
+                    variant: 'success'
+                  },
+                  {
+                    label: 'Historique',
+                    icon: History,
+                    onClick: () => openHistoryModal(ticket),
+                    variant: 'secondary'
+                  }
+                ];
+              } else if (activeTab === 'mes-ventes' && subTab === 'en-vente') {
+                buttonConfig = [
+                  {
+                    label: 'Annuler',
+                    icon: XCircle,
+                    onClick: () => handleCancelSale(ticket),
+                    variant: 'danger'
+                  },
+                  {
+                    label: 'Historique',
+                    icon: History,
+                    onClick: () => openHistoryModal(ticket),
+                    variant: 'secondary'
+                  }
+                ];
+              } else if (activeTab === 'mes-ventes' && subTab === 'disponibles') {
+                buttonConfig = [
+                  {
+                    label: 'Mettre en vente',
+                    icon: TrendingUp,
+                    onClick: () => openPriceModal(ticket),
+                    variant: 'primary'
+                  },
+                  {
+                    label: 'Historique',
+                    icon: History,
+                    onClick: () => openHistoryModal(ticket),
+                    variant: 'secondary'
+                  }
+                ];
+              }
 
-                    {subTab === 'en-vente' && (
-                      <button
-                        onClick={() => handleCancelSale(ticket)}
-                        className="w-full bg-gradient-to-r from-red-600 to-rose-500 text-white py-3 rounded-xl hover:shadow-lg hover:shadow-red-500/50 transition-all font-semibold flex items-center justify-center space-x-2"
-                      >
-                        <XCircle className="w-5 h-5" />
-                        <span>Annuler la vente</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+              return (
+                <TicketCard
+                  key={ticket.id}
+                  name={ticket.name}
+                  eventName={ticket.eventName}
+                  status={ticket.status}
+                  price={ticket.price}
+                  date={ticket.date}
+                  place={ticket.place}
+                  image={ticket.image}
+                  type={ticket.type}
+                  buttons={buttonConfig}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="bg-white rounded-2xl p-12 text-center shadow-md border border-gray-100">
@@ -459,7 +522,7 @@ export default function Marketplace() {
 
       {/* Modal Prix */}
       {showPriceModal && (
-        <div className="fixed inset-0 bg-white/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
@@ -529,7 +592,7 @@ export default function Marketplace() {
 
       {/* Modal Historique */}
       {showHistoryModal && (
-        <div className="fixed inset-0 bg-white/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
@@ -586,6 +649,18 @@ export default function Marketplace() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        title={confirmation.title}
+        message={confirmation.message}
+        confirmText="Confirmer"
+        cancelText="Annuler"
+        type={confirmation.type === 'danger' ? 'danger' : 'info'}
+        onConfirm={executeAction}
+        onCancel={() => setConfirmation({ ...confirmation, isOpen: false })}
+      />
 
       {/* Loader Modal */}
       <LoaderModal
