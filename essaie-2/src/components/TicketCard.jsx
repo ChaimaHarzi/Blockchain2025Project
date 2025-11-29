@@ -1,4 +1,4 @@
-import { Calendar, MapPin, AlertTriangle } from "lucide-react";
+import { Calendar, MapPin, AlertTriangle, Send, History } from "lucide-react";
 
 export default function TicketCard({
   name,
@@ -9,7 +9,9 @@ export default function TicketCard({
   place,
   image,
   type,
-  buttons = [] // Array of button objects: { label, icon: Icon, onClick, variant: 'primary'|'secondary'|'danger'|'success' }
+  buttons = [], // Array of button objects: { label, icon: Icon, onClick, variant: 'primary'|'secondary'|'danger'|'success' }
+  onTransfer, // Legacy prop for backward compatibility
+  onViewDetails // Legacy prop for backward compatibility
 }) {
 
   const isExpired = new Date(date) < new Date();
@@ -23,6 +25,24 @@ export default function TicketCard({
     };
     return styles[variant] || styles.primary;
   };
+
+  // Use legacy props if buttons array is empty
+  const buttonConfig = buttons.length > 0 ? buttons : (
+    onTransfer || onViewDetails ? [
+      ...(onTransfer ? [{
+        label: 'Transférer',
+        icon: Send,
+        onClick: onTransfer,
+        variant: 'primary'
+      }] : []),
+      ...(onViewDetails ? [{
+        label: 'Détails',
+        icon: History,
+        onClick: onViewDetails,
+        variant: 'secondary'
+      }] : [])
+    ] : []
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition overflow-hidden group">
@@ -89,9 +109,9 @@ export default function TicketCard({
         )}
 
         {/* Boutons d'action */}
-        {buttons.length > 0 && (
-          <div className={`flex gap-2 mt-3 ${buttons.length === 1 ? '' : ''}`}>
-            {buttons.map((btn, index) => {
+        {buttonConfig.length > 0 && (
+          <div className={`flex gap-2 mt-3 ${buttonConfig.length === 1 ? '' : ''}`}>
+            {buttonConfig.map((btn, index) => {
               const ButtonIcon = btn.icon;
               return (
                 <button

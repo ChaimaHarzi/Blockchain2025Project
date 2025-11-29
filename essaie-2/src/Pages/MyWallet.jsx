@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Copy, LogOut, Wallet as WalletIcon, Ticket, Eye, EyeOff, X, Send, User, Calendar } from 'lucide-react';
 import TicketCard from '../components/TicketCard';
 import { LoaderModal } from '../components/loader';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function Wallet({ address, balance, onDisconnect }) {
   const [tickets, setTickets] = useState([]);
@@ -13,6 +14,7 @@ export default function Wallet({ address, balance, onDisconnect }) {
   const [transferModal, setTransferModal] = useState({ open: false, ticket: null });
   const [detailsModal, setDetailsModal] = useState({ open: false, ticket: null });
   const [recipientAddress, setRecipientAddress] = useState('');
+  const [confirmation, setConfirmation] = useState({ isOpen: false, title: '', message: '', action: null, actionData: null });
   
   // États pour le loader
   const [loaderState, setLoaderState] = useState({
@@ -102,38 +104,61 @@ export default function Wallet({ address, balance, onDisconnect }) {
     setDetailsModal({ open: true, ticket });
   };
 
-  const executeTransfer = async () => {
+  const openTransferConfirmation = () => {
     if (!recipientAddress) {
-      alert("Veuillez saisir une adresse de destinataire");
+      setLoaderState({
+        isOpen: true,
+        message: 'Veuillez saisir une adresse de destinataire',
+        type: 'error'
+      });
+      setTimeout(() => {
+        setLoaderState({ isOpen: false, message: '', type: 'loading' });
+      }, 2000);
       return;
     }
-    
-    // Afficher le loader de chargement
+
+    setTransferModal({ open: false, ticket: null });
+    setConfirmation({
+      isOpen: true,
+      title: 'Confirmer le transfert',
+      message: `Êtes-vous sûr de vouloir transférer "${transferModal.ticket.name}" à ${formatAddress(recipientAddress)} ?`,
+      action: 'transfer',
+      actionData: { ticket: transferModal.ticket, recipient: recipientAddress },
+      type: 'info'
+    });
+  };
+
+  const executeAction = async () => {
+    setConfirmation({ ...confirmation, isOpen: false });
+
+    if (confirmation.action === 'transfer') {
+      await executeTransfer(confirmation.actionData.ticket, confirmation.actionData.recipient);
+    }
+  };
+
+  const executeTransfer = async (ticket, recipient) => {
     setLoaderState({
       isOpen: true,
       message: 'Transfert du ticket en cours...',
       type: 'loading'
     });
     
-    // Fermer le modal de transfert
-    setTransferModal({ open: false, ticket: null });
-    
     try {
       // Simulation d'un transfert avec délai
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Simuler un succès ou une erreur (dans la vraie app, ça dépendrait de la blockchain)
-      const isSuccess = Math.random() > 0.2; // 80% de chance de succès
+      // Simuler un succès (80% de chance de succès)
+      const isSuccess = Math.random() > 0.2;
       
       if (isSuccess) {
         setLoaderState({
           isOpen: true,
-          message: `Ticket transféré avec succès à ${formatAddress(recipientAddress)}`,
+          message: `Ticket transféré avec succès à ${formatAddress(recipient)}`,
           type: 'success'
         });
         
         // Mettre à jour les tickets (supprimer le ticket transféré)
-        setTickets(prev => prev.filter(ticket => ticket.id !== transferModal.ticket.id));
+        setTickets(prev => prev.filter(t => t.id !== ticket.id));
       } else {
         setLoaderState({
           isOpen: true,
@@ -150,6 +175,10 @@ export default function Wallet({ address, balance, onDisconnect }) {
     }
     
     setRecipientAddress('');
+    
+    setTimeout(() => {
+      setLoaderState({ isOpen: false, message: '', type: 'loading' });
+    }, 2500);
   };
 
   const closeLoader = () => {
@@ -276,7 +305,7 @@ export default function Wallet({ address, balance, onDisconnect }) {
 
       {/* Modal de Transfert */}
       {transferModal.open && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl relative">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl z-10">
               <button
@@ -308,7 +337,7 @@ export default function Wallet({ address, balance, onDisconnect }) {
               </div>
 
               <button
-                onClick={executeTransfer}
+                onClick={openTransferConfirmation}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 font-semibold flex items-center justify-center space-x-2"
               >
                 <Send className="w-5 h-5" />
@@ -321,7 +350,7 @@ export default function Wallet({ address, balance, onDisconnect }) {
 
       {/* Modal des Détails et Historique */}
       {detailsModal.open && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex justify-center items-center z-50 p-4">
           <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl z-10">
               <button
@@ -372,6 +401,18 @@ export default function Wallet({ address, balance, onDisconnect }) {
         message={loaderState.message}
         type={loaderState.type}
         onClose={loaderState.type !== 'loading' ? closeLoader : undefined}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        title={confirmation.title}
+        message={confirmation.message}
+        confirmText="Confirmer"
+        cancelText="Annuler"
+        type={confirmation.type}
+        onConfirm={executeAction}
+        onCancel={() => setConfirmation({ ...confirmation, isOpen: false })}
       />
     </div>
   );
