@@ -1,10 +1,64 @@
 import React, { useState } from 'react';
 import { X, Clock, MapPin } from 'lucide-react';
+import ConfirmationModal from './ConfirmationModal';
+import { LoaderModal } from './loader';
 
 const DetailsEvent = ({ isOpen, event, onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('loading');
+  const [loadingMessage, setLoadingMessage] = useState('Traitement de votre achat...');
 
   if (!isOpen || !event) return null;
+
+  const handleBuyClick = () => {
+    if (!selectedCategory) {
+      setIsLoading(true);
+      setLoadingStatus('error');
+      setLoadingMessage('Veuillez sélectionner un type de billet.');
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+      return;
+    }
+    setIsConfirmationOpen(true);
+  };
+
+  const handleConfirmPurchase = async () => {
+    setIsConfirmationOpen(false);
+    setIsLoading(true);
+    setLoadingStatus('loading');
+    setLoadingMessage('Traitement de votre achat...');
+
+    try {
+      // Simulate blockchain transaction
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Simulate success
+      setLoadingStatus('success');
+      setLoadingMessage(`Billet ${selectedCategory} acheté avec succès !`);
+      
+      // Close after 2 seconds
+      setTimeout(() => {
+        setIsLoading(false);
+        setSelectedCategory(null);
+        onClose();
+      }, 2000);
+    } catch (error) {
+      setLoadingStatus('error');
+      setLoadingMessage('Erreur lors de l\'achat. Veuillez réessayer.');
+      
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+    }
+  };
+
+  const handleClosePurchase = () => {
+    setIsLoading(false);
+    setLoadingStatus('loading');
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
@@ -111,18 +165,32 @@ const DetailsEvent = ({ isOpen, event, onClose }) => {
 
           <button
             className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white py-4 rounded-xl hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 font-semibold text-lg"
-            onClick={() => {
-              if (!selectedCategory) {
-                alert('Veuillez sélectionner un type de billet.');
-                return;
-              }
-              alert(`Achat du billet ${selectedCategory} déclenché !`);
-            }}
+            onClick={handleBuyClick}
           >
             Acheter maintenant
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isConfirmationOpen}
+        title="Confirmation d'achat"
+        message={`Voulez-vous confirmer l'achat d'un billet ${selectedCategory} pour ${event.name} ?`}
+        confirmText="Confirmer"
+        cancelText="Annuler"
+        type="info"
+        onConfirm={handleConfirmPurchase}
+        onCancel={() => setIsConfirmationOpen(false)}
+      />
+
+      {/* Loader Modal */}
+      <LoaderModal
+        isOpen={isLoading}
+        message={loadingMessage}
+        type={loadingStatus}
+        onClose={handleClosePurchase}
+      />
     </div>
   );
 };
