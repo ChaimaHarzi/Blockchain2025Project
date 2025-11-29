@@ -1,5 +1,4 @@
 /** @format */
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
@@ -9,13 +8,12 @@ import {
   Calendar,
   ChevronDown,
   Ticket,
-  Sparkles,
   ArrowRightLeft,
   Plus,
 } from "lucide-react";
 import EventCard from "../components/EventCard";
 import CreateEvent from "../components/CreateEvent";
-import Marketplace from "../components/Marketplace";
+import Marketplace from "./Marketplace";
 import DetailsEvent from "../components/DetailsEvent";
 
 const PrincInterface = () => {
@@ -24,7 +22,6 @@ const PrincInterface = () => {
   const [eventFilter, setEventFilter] = useState("all");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
   const navigate = useNavigate();
 
   const events = [
@@ -120,11 +117,11 @@ const PrincInterface = () => {
             {/* Navigation Menu */}
             <div className='flex items-center space-x-1'>
               <button
-                onClick={() => setShowTransferDialog(true)}
+                onClick={() => navigate("/Marketplace")}
                 className='flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all'>
                 <ArrowRightLeft className='w-5 h-5' />
                 <span className='font-medium hidden sm:inline'>
-                  Transférer/Revendre
+                  Marketplace
                 </span>
               </button>
 
@@ -202,8 +199,6 @@ const PrincInterface = () => {
 
       {/* Hero Section */}
       <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
-       
-
         {/* Events Section */}
         <div className='mb-8'>
           <div className='flex justify-between items-center mb-8'>
@@ -244,11 +239,6 @@ const PrincInterface = () => {
       <CreateEvent
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
-      />
-
-      <Marketplace
-        isOpen={showTransferDialog}
-        onClose={() => setShowTransferDialog(false)}
       />
 
       <DetailsEvent

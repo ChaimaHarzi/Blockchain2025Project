@@ -9,11 +9,15 @@ export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
 
-  const handleWalletConnected = (address) => {
-    setIsConnected(true);
-    setWalletAddress(address);
-    setShowWalletModal(false);
-  };
+const handleWalletConnected = (address) => {
+  setIsConnected(true);
+  setWalletAddress(address);
+
+  setTimeout(() => {
+    navigate("/events");
+  }, 300); // pas besoin d'animer ici, le modal s'en occupe
+};
+
 
   const goToEvents = () => {
     navigate('/events');

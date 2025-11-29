@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function ConnectWallet({ onClose, onConnected }) {
+  const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState('connecting');
 
@@ -11,6 +12,7 @@ export default function ConnectWallet({ onClose, onConnected }) {
   }, []);
 
   const connectMetaMask = async () => {
+    setIsConnecting(true);
     setError('');
     setStep('connecting');
 
@@ -45,6 +47,8 @@ export default function ConnectWallet({ onClose, onConnected }) {
       console.error('Erreur de connexion:', err);
       setError(err.message || 'Erreur lors de la connexion');
       setStep('error');
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -59,7 +63,7 @@ export default function ConnectWallet({ onClose, onConnected }) {
       {/* Modal */}
       <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in">
         {/* Decorative gradient bar */}
-        <div className="h-2 bg-linear-to-r from-purple-600 to-blue-500" />
+        <div className="h-2 bg-gradient-to-r from-purple-600 to-blue-500" />
 
         {/* Close button */}
         {step === 'error' && (
@@ -76,7 +80,7 @@ export default function ConnectWallet({ onClose, onConnected }) {
           {/* Connecting State */}
           {step === 'connecting' && (
             <div className="text-center py-8">
-              <div className="w-20 h-20 bg-linear-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/30">
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/30">
                 <span className="text-4xl animate-pulse">🦊</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Connexion à MetaMask...</h3>
@@ -94,7 +98,7 @@ export default function ConnectWallet({ onClose, onConnected }) {
           {/* Success State */}
           {step === 'success' && (
             <div className="text-center py-8">
-              <div className="w-20 h-20 bg-linear-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30 animate-bounce">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30 animate-bounce">
                 <CheckCircle className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Connexion Réussie !</h3>
@@ -107,7 +111,7 @@ export default function ConnectWallet({ onClose, onConnected }) {
           {/* Error State */}
           {step === 'error' && (
             <div className="text-center py-8">
-              <div className="w-20 h-20 bg-linear-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/30">
+              <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-500/30">
                 <AlertCircle className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Erreur de Connexion</h3>
@@ -120,14 +124,14 @@ export default function ConnectWallet({ onClose, onConnected }) {
                     href="https://metamask.io/download/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full bg-linear-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:shadow-lg hover:shadow-orange-500/50 transition-all font-semibold"
+                    className="block w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:shadow-lg hover:shadow-orange-500/50 transition-all font-semibold"
                   >
                     Installer MetaMask
                   </a>
                 )}
                 <button
                   onClick={connectMetaMask}
-                  className="w-full bg-linear-to-r from-purple-600 to-blue-500 text-white py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all font-semibold"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all font-semibold"
                 >
                   Réessayer
                 </button>
