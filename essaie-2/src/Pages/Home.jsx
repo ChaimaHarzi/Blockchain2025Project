@@ -1,27 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ConnectWallet from '../components/ConnectWallet';
 import { Ticket, Sparkles, Shield, TrendingUp, Users } from 'lucide-react';
 
 export default function Home() {
-  const navigate = useNavigate();
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
-
-const handleWalletConnected = (address) => {
-  setIsConnected(true);
-  setWalletAddress(address);
-
-  setTimeout(() => {
-    navigate("/events");
-  }, 300); // pas besoin d'animer ici, le modal s'en occupe
-};
-
-
-  const goToEvents = () => {
-    navigate('/events');
-  };
+  
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-blue-50">
@@ -40,21 +20,12 @@ const handleWalletConnected = (address) => {
             </div>
 
             {/* Bouton Connexion */}
-            {!isConnected ? (
-              <button
-                onClick={() => setShowWalletModal(true)}
-                className="flex items-center space-x-2 bg-linear-to-r from-purple-600 to-blue-500 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 font-semibold"
-              >
-                <span>Connecter Wallet</span>
-              </button>
-            ) : (
-              <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
-                <div className="w-8 h-8 bg-linear-to-br from-purple-600 to-blue-500 rounded-full" />
-                <span className="font-mono text-sm text-gray-700">
-                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                </span>
-              </div>
-            )}
+            <button
+
+            className="flex items-center space-x-2 bg-linear-to-r from-purple-600 to-blue-500 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 font-semibold"
+            >
+              <span>Connecter Wallet</span>
+            </button>
           </div>
         </div>
       </nav>
@@ -82,45 +53,19 @@ const handleWalletConnected = (address) => {
           </p>
 
           {/* CTA Button */}
-          {!isConnected ? (
-            <button
-              onClick={() => setShowWalletModal(true)}
-              className="group relative inline-flex items-center space-x-3 bg-linear-to-r from-purple-600 to-blue-500 text-white px-8 py-4 rounded-2xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 font-bold text-lg"
+          <button
+            className="group relative inline-flex items-center space-x-3 bg-linear-to-r from-purple-600 to-blue-500 text-white px-8 py-4 rounded-2xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 font-bold text-lg"
+          >
+            <span>Connecter mon Wallet</span>
+            <svg
+              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <span>Connecter mon Wallet</span>
-              <svg
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          ) : (
-            <div className="inline-flex flex-col items-center space-y-4">
-              <div className="flex items-center space-x-2 text-green-600 bg-green-50 px-6 py-3 rounded-xl border-2 border-green-200">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="font-semibold">Wallet Connecté</span>
-              </div>
-              <button 
-                onClick={goToEvents}
-                className="text-purple-600 hover:text-purple-700 font-semibold flex items-center space-x-1 group"
-              >
-                <span>Découvrir les événements</span>
-                <svg 
-                  className="w-5 h-5 group-hover:translate-x-1 transition-transform" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
-            </div>
-          )}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
 
         {/* Features Grid */}
@@ -239,13 +184,6 @@ const handleWalletConnected = (address) => {
         </div>
       </footer>
 
-      {/* Modal Connexion Wallet */}
-      {showWalletModal && (
-        <ConnectWallet
-          onClose={() => setShowWalletModal(false)}
-          onConnected={handleWalletConnected}
-        />
-      )}
     </div>
   );
 }
